@@ -24,7 +24,7 @@ user.json
     "adcode":"",  //行政区代码
     "address":""  //签到地址
   },
-  "reason": ""  //签到备注
+  "reason": "",  //签到备注
   "Qmsg":"",  //Qsmg酱的SCKEY
   "ServerChan":""  //Server酱的SCKEY
 }
