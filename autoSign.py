@@ -226,7 +226,8 @@ def getSignStatus(sessionId, trainId):
         'traineeId': trainId
     }
     resp = requests.post(url=url, headers=headers, data=data).json()
-    if(resp['data']['clockInfo']['inStatus'] != ''):
+    # if(resp['data']['clockInfo']['status'] == 0):
+    if(len(resp['data']['clockInfo']['inTime']) > 0):
         return True
     else:
         return False
