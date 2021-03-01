@@ -9,6 +9,11 @@ python3
 ### 运行方式
 
 配置`user.json`内容，运行`autoSign.py`
+
+
+> 运行出错或无法实际签到请尝试使用`copy.py`版本
+
+
 user.json
 
 ```javascript
