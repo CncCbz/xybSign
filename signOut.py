@@ -299,6 +299,7 @@ def main():
     }
     if(getSignStatus(sessionId, trainId)):
         log('已签到,执行重新签到')
+        autoSign(sessionId, signFormData)
         newSign(sessionId, signFormData)
     else:
         autoSign(sessionId, signFormData)
