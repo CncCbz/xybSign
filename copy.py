@@ -217,21 +217,6 @@ def newSign(sessionId, data):
     log(resp['msg'])
     return resp['msg']
 
-# 获取签到状态
-def getSignStatus(sessionId, trainId):
-    headers = getHeader(host1)
-    headers['cookie'] = f'JSESSIONID={sessionId}'
-    url = urls['status']
-    data = {
-        'traineeId': trainId
-    }
-    resp = requests.post(url=url, headers=headers, data=data).json()
-    # if(resp['data']['clockInfo']['status'] == 0):
-    if(len(resp['data']['clockInfo']['inTime']) > 0):
-        return True
-    else:
-        return False
-
 # 获取用户信息
 def getUserInfo():
     with open('user.json', 'r', encoding='utf8') as fp:
