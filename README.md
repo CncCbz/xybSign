@@ -75,6 +75,8 @@ user.json
 ![6.jpg](https://ae01.alicdn.com/kf/U5a8052c902dd4cc2b08b2b50d70270cfT.jpg)
 ![7.jpg](https://ae01.alicdn.com/kf/Ubc0fd3f3036e430b9fe73f91e5df42a9S.jpg)
 
+> 需要签退则复制signOut.py文件中的代码，再创建一个云函数即可
+
 > 若需要qq机器人或wx推送签到结果，可使用[Qmsg酱](https://qmsg.zendee.cn/)或[Server酱](http://sc.ftqq.com/3.versionServer)。前往他们的官网获取`KEY`后填入`user.json`即可
 
 代码参考[java 项目](https://github.com/xiaomingxingwu/xyb-sign)
