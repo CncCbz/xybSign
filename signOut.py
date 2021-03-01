@@ -297,7 +297,11 @@ def main():
         'imgUrl': '',
         'reason': userInfo['reason']
     }
-    autoSign(sessionId, signFormData)
+    if(getSignStatus(sessionId, trainId)):
+        log('已签到,执行重新签到')
+        newSign(sessionId, signFormData)
+    else:
+        autoSign(sessionId, signFormData)
     if (getSignStatus(sessionId, trainId)):
         # sendQmsgChan('已签到')
         # sendServerChan('已签到')
