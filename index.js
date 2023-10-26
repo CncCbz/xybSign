@@ -430,7 +430,7 @@ async function run() {
   }
   console.log("====所有账号执行结束====");
   console.log(results.join("\n"));
-  if (config.qmsgKey && config.qmsgTo) {
+  if (config.qmsgKey) {
     await sendMsg(results.join("\n"));
   }
 }

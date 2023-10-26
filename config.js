@@ -25,7 +25,7 @@ const config = {
     // },
   ],
   qmsgKey: "", //qmsg酱key
-  qmsgTo: "", //推送的qq号,用,分隔
+  qmsgTo: "", //推送的qq号,用,分隔(可选)
 };
 for (const account of config.accounts) {
   account.password = md5(account.password);
