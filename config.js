@@ -1,22 +1,55 @@
 const md5 = require("blueimp-md5");
+
 const config = {
-  username: "",  //校友邦用户名(手机号)
-  password: "",  //登录密码
-  openId: "",  //小程序openid(可不填)
-  unionId: "",  //小程序unionId(可不填)
-  qmsgKey: "",  //qmsg推送key
-  qmsgTo: "",  //qmsg推送给的用户qq号(以,分隔)
+  accounts: [
+    {
+      username: "", //用户名
+      password: "", //密码
+      openId: "", //微信小程序抓包openid(可选)
+      unionId: "", //微信小程序抓包unionId(可选)
+      sign: true, //是否打开签到
+      reSign: false, //是否重新签到
+      signImagePath: "./images/1.jpeg", //签到图片
+      needReport: false, //是否自动填写周报
+    },
+    // 添加多个账户
+    // {
+    //   username: "",
+    //   password: "",
+    //   openId: "",
+    //   unionId: "",
+    //   sign: false, //是否打开签到
+    //   reSign: false, //是否重新签到
+    //   signImagePath: "", //签到图片
+    //   needReport: true, //是否自动填写周报
+    // },
+  ],
+  qmsgKey: "", //qmsg酱key
+  qmsgTo: "", //推送的qq号,用,分隔
 };
+for (const account of config.accounts) {
+  account.password = md5(account.password);
+}
 
 const apis = {
   login: "login/login.action",
+  accountInfo: "account/LoadAccountInfo.action",
   projects: "student/progress/ProjectList.action",
   tasks: "student/progress/ProjectProgressInfo.action",
+  //周报
   weekBlogStatus: "student/blog/Plan!getDefault.action",
   weekReportsDate: "student/blog/LoadBlogDate!weekYear.action",
   weekReports: "student/blog/LoadBlogDate!week.action",
   weelBlogSave: "student/blog/Blog!save.action",
   weelBlogSubmit: "student/blog/Blog!getSubmitData.action",
+  //签到
+  clockDefault: "student/clock/GetPlan!getDefault.action", //planId => traineeId
+  clockDetail: "student/clock/GetPlan!detail.action", //traineeId => postInfo
+  clockUpdate: "student/clock/postTemporary!updateClock.action", // reClock
+  //上传
+  uploadInfo: "uploadfile/commonPostPolicy.action", //oss info
+  uploadFile: "https://xyb001.oss-cn-hangzhou.aliyuncs.com/",
+  duration: "behavior/Duration.action",
 };
 
 const reports = [
@@ -121,7 +154,5 @@ const reports = [
     况且我还是个实习的，我想等我经历得更多，对于客户更加的熟悉，有了更多的经验，那么我的业绩也是会名列前茅的，特别是我也是感受到看到我的成绩，其他和我一起来到公司实习的同事，也是更加的努力了，的确别人可以，那么我为什么就不行，其实也是努力，去执行，去多反思把方法用对，业绩的目标是完全可以达成的。`,
   ],
 ];
-
-config.password = md5(config.password);
 
 module.exports = { config, apis, reports };
