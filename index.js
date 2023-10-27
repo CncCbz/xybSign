@@ -6,6 +6,7 @@ const fs = require("fs");
 const FormData = require("form-data");
 
 async function xybSign(config) {
+  let results = "";
   const baseUrl = "https://xcx.xybsyw.com/";
   const $http = {
     get: function (url, data) {
@@ -21,7 +22,7 @@ async function xybSign(config) {
           return res.data.data;
         })
         .catch((err) => {
-          console.log(err);
+          throw new Error(err);
         });
     },
     post: function (url, data) {
@@ -33,10 +34,13 @@ async function xybSign(config) {
           },
         })
         .then((res) => {
+          if (res.data.code != "200") {
+            throw new Error(res.data.msg);
+          }
           return res.data.data;
         })
         .catch((err) => {
-          console.log(err);
+          throw new Error(err);
         });
     },
     upload: function (url, form) {
@@ -50,7 +54,7 @@ async function xybSign(config) {
           return res.data;
         })
         .catch((err) => {
-          console.log("err");
+          throw new Error(err);
         });
     },
   };
@@ -118,27 +122,35 @@ async function xybSign(config) {
     for (let task of taskInfos) {
       if (task.needSign) {
         // console.log("签到:");
-        results.push("签到:")
+        results.push("签到:");
         if (config.sign) {
-          const { data } = await doClock(task);
-          results.push(data);
-        }else{
-          results.push("未开启自动签到")
+          try {
+            const { data } = await doClock(task);
+            results.push(data);
+          } catch (err) {
+            results.push(`签到失败${err}`);
+          }
+        } else {
+          results.push("未开启自动签到");
           // console.log("未开启自动签到");
         }
       }
       if (task.needWeekBlogs) {
         // console.log("填写周报:");
-        results.push("填写周报:")
+        results.push("填写周报:");
         if (config.needReport) {
-          let weekBlogRes = await doWeekBlogs(task);
-          if (weekBlogRes) {
-            results.push(weekBlogRes);
-          }else{
-            results.push("无");
+          try {
+            let weekBlogRes = await doWeekBlogs(task);
+            if (weekBlogRes) {
+              results.push(weekBlogRes);
+            } else {
+              results.push("无");
+            }
+          } catch (err) {
+            results.push(`填写周报失败${err}`);
           }
-        }else{
-          results.push("未开启自动填写周报")
+        } else {
+          results.push("未开启自动填写周报");
           // console.log("未开启自动填写周报");
         }
       }
@@ -256,14 +268,14 @@ async function xybSign(config) {
       if (config.reSign) {
         // console.log("已签到,重新签到");
         result = await updateClock(clockForm);
-      }else{
-        result.data = "已签到,未开启重新签到"
+      } else {
+        result.data = "已签到,未开启重新签到";
         // console.log("已签到,未开启重新签到");
       }
       return result;
     } else if (res === 1) {
       // console.log("签到");
-      const { res, data } = await updateClock(clockForm);
+      const { res, data } = await newClock(clockForm);
       return {
         res,
         data,
@@ -298,6 +310,16 @@ async function xybSign(config) {
     return {
       res: true,
       data: `重新签到: 当前为签到的第${startTraineeDayNum}天, 签到排名为${signPersonNum}`,
+    };
+  };
+  const newClock = async (form) => {
+    const { startTraineeDayNum, signPersonNum } = await $http.post(
+      apis.clockNew,
+      form
+    );
+    return {
+      res: true,
+      data: `签到: 当前为签到的第${startTraineeDayNum}天, 签到排名为${signPersonNum}`,
     };
   };
 
@@ -406,7 +428,6 @@ async function xybSign(config) {
     const newLongitude = (newLon * 180) / Math.PI;
     return { lat: newLatitude, lng: newLongitude };
   };
-  let results = "";
   const xyb = async () => {
     await login();
     await getAccountInfo();

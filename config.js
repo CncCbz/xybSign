@@ -18,10 +18,10 @@ const config = {
     //   password: "",
     //   openId: "",
     //   unionId: "",
-    //   sign: false, //是否打开签到
+    //   sign: true, //是否打开签到
     //   reSign: false, //是否重新签到
     //   signImagePath: "", //签到图片
-    //   needReport: true, //是否自动填写周报
+    //   needReport: false, //是否自动填写周报
     // },
   ],
   qmsgKey: "", //qmsg酱key
@@ -45,7 +45,8 @@ const apis = {
   //签到
   clockDefault: "student/clock/GetPlan!getDefault.action", //planId => traineeId
   clockDetail: "student/clock/GetPlan!detail.action", //traineeId => postInfo
-  clockUpdate: "student/clock/postTemporary!updateClock.action", // reClock
+  clockNew: "student/clock/postTemporary.action",
+  clockUpdate: "student/clock/postTemporary.action", // reClock
   //上传
   uploadInfo: "uploadfile/commonPostPolicy.action", //oss info
   uploadFile: "https://xyb001.oss-cn-hangzhou.aliyuncs.com/",
