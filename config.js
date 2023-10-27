@@ -1,24 +1,25 @@
 const md5 = require("blueimp-md5");
 
 const config = {
+  mode: "out", // 签到:in,签退:out
   accounts: [
     {
       username: "", //用户名
       password: "", //密码
       openId: "", //微信小程序抓包openid(可选)
       unionId: "", //微信小程序抓包unionId(可选)
-      sign: true, //是否打开签到
+      sign: true, //是否自动签到
       reSign: false, //是否重新签到
       // signImagePath: "./images/1.jpeg", //签到图片
       // needReport: false, //是否自动填写周报
     },
     // 添加多个账户
     // {
-    //   username: "16639529185",
-    //   password: "ts1234560",
+    //   username: "",
+    //   password: "",
     //   openId: "",
     //   unionId: "",
-    //   sign: true, //是否打开签到
+    //   sign: true, //是否自动签到
     //   reSign: true, //是否重新签到
     //   signImagePath: "./images/1.jpeg", //签到图片
     //   needReport: false, //是否自动填写周报
@@ -30,6 +31,11 @@ const config = {
 for (const account of config.accounts) {
   account.password = md5(account.password);
 }
+const modeCN = {
+  in: "签到",
+  out: "签退",
+};
+config.modeCN = modeCN[config.mode];
 
 const apis = {
   login: "login/login.action",
@@ -45,16 +51,17 @@ const apis = {
   //签到
   clockDefault: "student/clock/GetPlan!getDefault.action", //planId => traineeId
   clockDetail: "student/clock/GetPlan!detail.action", //traineeId => postInfo
-  clockNew: "student/clock/Post!autoClock.action",
-  clockUpdate: "student/clock/Post!updateClock.action", // reClock
-  clockRemarkUpdate: "student/clock/PostNew!updateClock.action",  //备注签到
+  clock: "student/clock/Post!autoClock.action", //首次签到
+  clockNew: "student/clock/PostNew.action", //重新签到或签退
+  clockUpdate: "student/clock/PostNew!updateClock.action", //更新最近的签到/签退记录，已有签退记录时无法更新之前的签到记录
+  // clockUpdate: "student/clock/Post!updateClock.action", // reClock
   // clockNew: "student/clock/Post!autoClock.action", //临时接口
   // clockUpdate: "student/clock/postTemporary!updateClock.action", // reClock 临时接口
   //上传
   uploadInfo: "uploadfile/commonPostPolicy.action", //oss info
   uploadFile: "https://xyb001.oss-cn-hangzhou.aliyuncs.com/",
   duration: "behavior/Duration.action",
-  ip:"behavior/Duration!getIp.action",
+  ip: "behavior/Duration!getIp.action",
 };
 
 const reports = [

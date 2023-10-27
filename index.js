@@ -8,9 +8,9 @@ const FormData = require("form-data");
 async function xybSign(config) {
   let results = "";
   const baseUrl = "https://xcx.xybsyw.com/";
-  const baseUrl2 = "https://app.xybsyw.com/";
+  // const baseUrl2 = "https://app.xybsyw.com/";
   const $http = {
-    get: function (url, data, duration = false) {
+    get: function (url, data) {
       return axios
         .get((duration ? baseUrl2 : baseUrl) + url, {
           params: data,
@@ -26,9 +26,9 @@ async function xybSign(config) {
           throw new Error(err);
         });
     },
-    post: function (url, data, duration = false) {
+    post: function (url, data) {
       return axios
-        .post((duration ? baseUrl2 : baseUrl) + url, data, {
+        .post(baseUrl + url, data, {
           headers: {
             ...getHeaders(url, data),
             cookie,
@@ -64,6 +64,10 @@ async function xybSign(config) {
     loginer: "姓名",
     loginerId: "6666666",
     ip: "1.1.1.1",
+  };
+  const SIGN_STATUS = {
+    IN: 2,
+    OUT: 1,
   };
 
   const login = async () => {
@@ -123,18 +127,16 @@ async function xybSign(config) {
     let results = [];
     for (let task of taskInfos) {
       if (task.needSign) {
-        // console.log("签到:");
-        results.push("签到:");
+        results.push(`${config.modeCN}:`);
         if (config.sign) {
           try {
             const { data } = await doClock(task);
             results.push(data);
           } catch (err) {
-            results.push(`签到失败${err}`);
+            results.push(`${config.modeCN}失败${err}`);
           }
         } else {
-          results.push("未开启自动签到");
-          // console.log("未开启自动签到");
+          results.push("未开启自动${config.modeCN}");
         }
       }
       if (task.needWeekBlogs) {
@@ -227,61 +229,60 @@ async function xybSign(config) {
     return submitNum > 0;
   };
 
-  // 签到
+  // 签到/签退
   const doClock = async (taskInfo) => {
     const { clockVo } = await $http.post(apis.clockDefault, {
       planId: taskInfo.planId,
     });
     const traineeId = clockVo?.traineeId;
-    const { res, data } = await getClockInfo(traineeId);
-    if (res === 0) {
-      return {
-        res: false,
-        data,
-      };
-    }
-    const { lat, lng } = getRandomCoordinates(
-      data.lat,
-      data.lng,
-      data.distance
-    ); //生成随机经纬度
-    let imgUrl = "";
-    if (config.signImagePath) {
-      imgUrl = await clockUpload(config.signImagePath);
-    }
-    const clockForm = {
-      traineeId,
-      adcode: "",
-      lat,
-      lng,
-      address: data.address || "",
-      deviceName: getDeviceName() || "Macmini9,1",
-      punchInStatus: 0,
-      clockStatus: 2,
-      // imgUrl,
-      // reason: "签到",
-      // addressId: data.addressId,
-    };
-    if (res === -1) {
-      let result = {
-        res: "200",
-        data: "已签到",
-      };
-      if (config.reSign) {
-        console.log("已签到,重新签到");
-        result = await updateClock(clockForm);
+    const { res, postInfo, isSignin, isSignout } = await getClockInfo(
+      traineeId
+    );
+    postInfo.traineeId = traineeId;
+    console.log("mode=>",config.mode);
+    if(config.mode === "in"){
+      //执行签到模式
+      if (isSignin) {
+        if (config.reSign) {
+          if (!isSignout) {
+            console.log("已签到,重新签到");
+            const form = getClockForm(postInfo, SIGN_STATUS.IN);
+            return await updateClock(form);
+          } else {
+            return {
+              res: true,
+              data: "已签退,无法进行签到",
+            };
+          }
+        } else {
+          return {
+            res: true,
+            data: "已签到,未开启重新签到",
+          };
+        }
       } else {
-        result.data = "已签到,未开启重新签到";
-        console.log("已签到,未开启重新签到");
+        // 首次签到
+        const form = getClockForm(postInfo, SIGN_STATUS.IN);
+        return await newClock(form);
       }
-      return result;
-    } else if (res === 1) {
-      // console.log("签到");
-      const { res, data } = await newClock(clockForm);
-      return {
-        res,
-        data,
-      };
+    }else{
+      //执行签退模式
+      if(isSignout){
+        if(config.reSign){
+          console.log("已签退,重新签退");
+          const form = getClockForm(postInfo, SIGN_STATUS.OUT);
+          return await updateClock(form);
+        }else{
+          return {
+            res: true,
+            data: "已签退,未开启重新签退",
+          };
+        }
+      }else{
+        //首次签退
+        const form = getClockForm(postInfo, SIGN_STATUS.OUT);
+        return await newClock(form);
+      }
     }
   };
   const getClockInfo = async (traineeId) => {
@@ -300,33 +301,60 @@ async function xybSign(config) {
     }
     const { inStatus, outStatus, inTime, outTime } = clockInfo; //TODO 用inStatus和outStatus来判断是否已签到
     return {
-      res: !!inTime ? -1 : 1, //-1表示重新签到
-      data: postInfo,
+      res: !!inTime ? -1 : 1, //-1表示已签到,1表示未签到
+      postInfo,
+      isSignin: !!inTime,
+      isSignout: !!outTime,
     };
   };
   const updateClock = async (form) => {
-    // await duration();
-    const { startTraineeDayNum, signPersonNum } = await $http.post(
-      apis.clockUpdate,
-      form
-    );
+    await $http.post(apis.clockUpdate, form);
     return {
       res: true,
-      data: `重新签到: 当前为签到的第${startTraineeDayNum}天, 签到排名为${signPersonNum}`,
+      data: `已重新${config.modeCN}`,
     };
   };
   const newClock = async (form) => {
     // await duration();
     const { startTraineeDayNum, signPersonNum } = await $http.post(
-      apis.clockNew,
+      apis.clock,
       form
     );
     return {
       res: true,
-      data: `签到: 当前为签到的第${startTraineeDayNum}天, 签到排名为${signPersonNum}`,
+      data: `${config.modeCN}: 当前为第${startTraineeDayNum}天, 排名为${signPersonNum}`,
     };
   };
-
+  const getClockForm = async (postInfo, signStatus) => {
+    const { lat, lng } = getRandomCoordinates(
+      postInfo.lat,
+      postInfo.lng,
+      postInfo.distance
+    ); //生成随机经纬度
+    let result = {
+      traineeId: postInfo.traineeId,
+      adcode: "550000",
+      lat,
+      lng,
+      address: postInfo.address || "",
+      deviceName: getDeviceName() || "Macmini9,1",
+      punchInStatus: 1,
+      clockStatus: signStatus,
+      addressId: postInfo.addressId,
+    };
+    let imgUrl = "";
+    if (config.signImagePath) {
+      try {
+        imgUrl = await clockUpload(config.signImagePath);
+      } catch (error) {
+        console.log("上传图片失败");
+      }
+      result.imgUrl = imgUrl;
+      result.reason = "签到";
+    }
+    return result;
+  };
+  
   //获取用户信息
   const getAccountInfo = async () => {
     const { loginer } = await $http.post(apis.accountInfo);
@@ -341,7 +369,7 @@ async function xybSign(config) {
       policy,
       signature,
       success_action_status,
-      host
+      host,
     } = await $http.post(apis.uploadInfo, {
       customerType: "STUDENT",
       uploadType: "UPLOAD_STUDENT_CLOCK_IMGAGES",
@@ -464,6 +492,8 @@ ${result}`;
 async function run() {
   let results = [];
   for (const account of config.accounts) {
+    account.mode = config.mode;
+    account.modeCN = config.modeCN;
     results.push(await xybSign(account));
     console.log(`====当前账号(${account.username})执行结束====`);
   }
@@ -475,4 +505,3 @@ async function run() {
 }
 
 run();
-
