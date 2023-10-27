@@ -8,10 +8,11 @@ const FormData = require("form-data");
 async function xybSign(config) {
   let results = "";
   const baseUrl = "https://xcx.xybsyw.com/";
+  const baseUrl2 = "https://app.xybsyw.com/";
   const $http = {
-    get: function (url, data) {
+    get: function (url, data, duration = false) {
       return axios
-        .get(baseUrl + url, {
+        .get((duration ? baseUrl2 : baseUrl) + url, {
           params: data,
           headers: {
             ...getHeaders(url, data),
@@ -25,9 +26,9 @@ async function xybSign(config) {
           throw new Error(err);
         });
     },
-    post: function (url, data) {
+    post: function (url, data, duration = false) {
       return axios
-        .post(baseUrl + url, data, {
+        .post((duration ? baseUrl2 : baseUrl) + url, data, {
           headers: {
             ...getHeaders(url, data),
             cookie,
@@ -62,6 +63,7 @@ async function xybSign(config) {
   let accountInfo = {
     loginer: "姓名",
     loginerId: "6666666",
+    ip: "1.1.1.1",
   };
 
   const login = async () => {
@@ -256,9 +258,9 @@ async function xybSign(config) {
       deviceName: getDeviceName() || "Macmini9,1",
       punchInStatus: 0,
       clockStatus: 2,
-      imgUrl,
-      reason: "签到",
-      addressId: data.addressId,
+      // imgUrl,
+      // reason: "签到",
+      // addressId: data.addressId,
     };
     if (res === -1) {
       let result = {
@@ -266,11 +268,11 @@ async function xybSign(config) {
         data: "已签到",
       };
       if (config.reSign) {
-        // console.log("已签到,重新签到");
+        console.log("已签到,重新签到");
         result = await updateClock(clockForm);
       } else {
         result.data = "已签到,未开启重新签到";
-        // console.log("已签到,未开启重新签到");
+        console.log("已签到,未开启重新签到");
       }
       return result;
     } else if (res === 1) {
@@ -303,6 +305,7 @@ async function xybSign(config) {
     };
   };
   const updateClock = async (form) => {
+    // await duration();
     const { startTraineeDayNum, signPersonNum } = await $http.post(
       apis.clockUpdate,
       form
@@ -313,6 +316,7 @@ async function xybSign(config) {
     };
   };
   const newClock = async (form) => {
+    // await duration();
     const { startTraineeDayNum, signPersonNum } = await $http.post(
       apis.clockNew,
       form
@@ -337,6 +341,7 @@ async function xybSign(config) {
       policy,
       signature,
       success_action_status,
+      host
     } = await $http.post(apis.uploadInfo, {
       customerType: "STUDENT",
       uploadType: "UPLOAD_STUDENT_CLOCK_IMGAGES",
@@ -355,44 +360,53 @@ async function xybSign(config) {
     formData.append("file", fileStream, {
       filename: `${expire}.jpeg`, // 自定义文件名
     });
-    const { status, vo } = await $http.upload(apis.uploadFile, formData);
+    const { status, vo } = await $http.upload(host, formData);
     return vo?.key;
   };
 
   const duration = async () => {
-    await $http.post(apis.duration, {
-      fromType: "",
-      urlParamsStr: "",
-      app: "wx_student",
-      appVersion: "1.6.36",
-      userId: accountInfo.loginerId,
-      deviceToken: config.openId,
-      userName: accountInfo.loginer,
-      country: "none",
-      province: "none",
-      city: "none",
-      deviceModel: "Macmini9,1",
-      operatingSystem: "android",
-      operatingSystemVersion: "none",
-      screenHeight: "736",
-      screenWidth: "414",
-      eventTime: Math.floor(Date.now() / 1000),
-      pageId: "5",
-      pageName: "我的",
-      pageUrl: "pages/mine/index/index",
-      preferName: "成长",
-      preferPageId: "2",
-      preferPageUrl: "pages/growup/growup",
-      stayTime: "8",
-      eventType: "read",
-      eventName: "none",
-      clientIP: "60.186.84.38",
-      reportSrc: "2",
-      login: "1",
-      netType: "WIFI",
-      itemID: "none",
-      itemType: "其他",
-    });
+    await $http.post(
+      apis.duration,
+      {
+        fromType: "",
+        urlParamsStr: "",
+        app: "wx_student",
+        appVersion: "1.6.36",
+        userId: accountInfo.loginerId,
+        deviceToken: config.openId,
+        userName: accountInfo.loginer,
+        operatingSystemVersion: "10",
+        deviceModel: "microsoft",
+        operatingSystem: "android",
+        country: "none",
+        province: "none",
+        city: "none",
+        screenHeight: "736",
+        screenWidth: "414",
+        eventTime: Math.floor(Date.now() / 1000),
+        pageId: "5",
+        pageUrl: "growUp/pages/sign/sign/sign",
+        preferName: "成长",
+        pageName: "成长-签到",
+        preferPageId: "2",
+        preferPageUrl: "pages/growup/growup",
+        stayTime: "8",
+        eventType: "read",
+        eventName: "none",
+        clientIP: accountInfo.ip,
+        reportSrc: "2",
+        login: "1",
+        netType: "WIFI",
+        itemID: "none",
+        itemType: "其他",
+      },
+      true
+    );
+  };
+  const getIP = async () => {
+    const { ip } = await $http.post(apis.ip);
+    accountInfo.ip = ip;
+    return ip;
   };
 
   const getDeviceName = () => {
@@ -426,12 +440,17 @@ async function xybSign(config) {
       lon + ((randomDistance / earthRadius) * (180 / Math.PI)) / Math.cos(lat);
     const newLatitude = (newLat * 180) / Math.PI;
     const newLongitude = (newLon * 180) / Math.PI;
-    return { lat: newLatitude, lng: newLongitude };
+    return { lat: newLatitude.toFixed(6), lng: newLongitude.toFixed(6) };
   };
   const xyb = async () => {
-    await login();
-    await getAccountInfo();
-    await duration();
+    try {
+      await login();
+      await getAccountInfo();
+      // await duration();
+      await getIP();
+    } catch (err) {
+      results += `### 账号(${config.username} ###\n${err}\n`;
+    }
     const tasks = await getTasks();
     const result = await doTasks(tasks);
     results += `###${accountInfo.loginer}###
@@ -439,7 +458,6 @@ ${result}`;
     // await sendMsg(result);
   };
   await xyb();
-  console.log(results);
   return results;
 }
 
@@ -457,4 +475,4 @@ async function run() {
 }
 
 run();
-// console.log(accountInfo);
+

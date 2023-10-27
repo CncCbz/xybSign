@@ -9,18 +9,18 @@ const config = {
       unionId: "", //微信小程序抓包unionId(可选)
       sign: true, //是否打开签到
       reSign: false, //是否重新签到
-      signImagePath: "./images/1.jpeg", //签到图片
-      needReport: false, //是否自动填写周报
+      // signImagePath: "./images/1.jpeg", //签到图片
+      // needReport: false, //是否自动填写周报
     },
     // 添加多个账户
     // {
-    //   username: "",
-    //   password: "",
+    //   username: "16639529185",
+    //   password: "ts1234560",
     //   openId: "",
     //   unionId: "",
     //   sign: true, //是否打开签到
-    //   reSign: false, //是否重新签到
-    //   signImagePath: "", //签到图片
+    //   reSign: true, //是否重新签到
+    //   signImagePath: "./images/1.jpeg", //签到图片
     //   needReport: false, //是否自动填写周报
     // },
   ],
@@ -45,12 +45,16 @@ const apis = {
   //签到
   clockDefault: "student/clock/GetPlan!getDefault.action", //planId => traineeId
   clockDetail: "student/clock/GetPlan!detail.action", //traineeId => postInfo
-  clockNew: "student/clock/postTemporary.action",
-  clockUpdate: "student/clock/postTemporary.action", // reClock
+  clockNew: "student/clock/Post!autoClock.action",
+  clockUpdate: "student/clock/Post!updateClock.action", // reClock
+  clockRemarkUpdate: "student/clock/PostNew!updateClock.action",  //备注签到
+  // clockNew: "student/clock/Post!autoClock.action", //临时接口
+  // clockUpdate: "student/clock/postTemporary!updateClock.action", // reClock 临时接口
   //上传
   uploadInfo: "uploadfile/commonPostPolicy.action", //oss info
   uploadFile: "https://xyb001.oss-cn-hangzhou.aliyuncs.com/",
   duration: "behavior/Duration.action",
+  ip:"behavior/Duration!getIp.action",
 };
 
 const reports = [

@@ -372,7 +372,7 @@ const getHeaders = function (url, data) {
     Host: "xcx.xybsyw.com",
     Connection: "keep-alive",
     "User-agent":
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36 MicroMessenger/6.8.0(0x16080000) NetType/WIFI MiniProgramEnv/Mac MacWechat/WMPF XWEB/30515",
+      "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36 MicroMessenger/7.0.9.501 NetType/WIFI MiniProgramEnv/Windows WindowsWechat",
     // referer: "https://servicewechat.com/wx9f1c2e0bbc10673c/317/page-frame.html",
     "Accept-Encoding": "gzip, deflate, br",
     "Accept-Language": "zh-cn",
