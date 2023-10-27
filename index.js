@@ -208,10 +208,13 @@ async function xybSign(config) {
     const blogType = 1;
     const blogs = reports[blogTask.week - 1];
     console.log(">> 保存周报");
+    if(!blogs || !blogs.length){
+      return false;
+    }
     const id = await $http.post(apis.weelBlogSave, {
       blogType,
       blogTitle: "实习周记",
-      blogBody: blogs[Math.round(Math.random() * blogs.length)],
+      blogBody: blogs[Math.round(Math.random() * (blogs.length - 1))],
       blogOpenType: 2,
       traineeId: traineeId,
       isDraft: 0,
@@ -239,8 +242,8 @@ async function xybSign(config) {
       traineeId
     );
     postInfo.traineeId = traineeId;
-    console.log("mode=>",config.mode);
-    if(config.mode === "in"){
+    console.log("mode=>", config.mode);
+    if (config.mode === "in") {
       //执行签到模式
       if (isSignin) {
         if (config.reSign) {
@@ -265,20 +268,20 @@ async function xybSign(config) {
         const form = getClockForm(postInfo, SIGN_STATUS.IN);
         return await newClock(form);
       }
-    }else{
+    } else {
       //执行签退模式
-      if(isSignout){
-        if(config.reSign){
+      if (isSignout) {
+        if (config.reSign) {
           console.log("已签退,重新签退");
           const form = getClockForm(postInfo, SIGN_STATUS.OUT);
           return await updateClock(form);
-        }else{
+        } else {
           return {
             res: true,
             data: "已签退,未开启重新签退",
           };
         }
-      }else{
+      } else {
         //首次签退
         const form = getClockForm(postInfo, SIGN_STATUS.OUT);
         return await newClock(form);
@@ -354,7 +357,7 @@ async function xybSign(config) {
     }
     return result;
   };
-  
+
   //获取用户信息
   const getAccountInfo = async () => {
     const { loginer } = await $http.post(apis.accountInfo);
