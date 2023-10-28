@@ -208,7 +208,7 @@ async function xybSign(config) {
     const blogType = 1;
     const blogs = reports[blogTask.week - 1];
     console.log(">> 保存周报");
-    if(!blogs || !blogs.length){
+    if (!blogs || !blogs.length) {
       return false;
     }
     const id = await $http.post(apis.weelBlogSave, {
@@ -265,8 +265,13 @@ async function xybSign(config) {
         }
       } else {
         // 首次签到
-        const form = getClockForm(postInfo, SIGN_STATUS.IN);
-        return await newClock(form);
+        const form = await getClockForm(postInfo, SIGN_STATUS.IN);
+        await newClock(form);
+        const { isSignin: success } = await getClockInfo(traineeId);
+        return {
+          res: success,
+          data: success ? "签到成功" : "签到失败",
+        };
       }
     } else {
       //执行签退模式
@@ -283,8 +288,13 @@ async function xybSign(config) {
         }
       } else {
         //首次签退
-        const form = getClockForm(postInfo, SIGN_STATUS.OUT);
-        return await newClock(form);
+        const form = await getClockForm(postInfo, SIGN_STATUS.OUT);
+        await newClock(form);
+        const { isSignout: success } = await getClockInfo(traineeId);
+        return {
+          res: success,
+          data: success ? "签退成功" : "签退失败",
+        };
       }
     }
   };
