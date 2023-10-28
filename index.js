@@ -490,7 +490,8 @@ async function xybSign(config) {
       // await duration();
       await getIP();
     } catch (err) {
-      results += `### 账号(${config.username} ###\n${err}\n`;
+      results += `### 账号(${config.username}) ###\n${err}\n`;
+      return;
     }
     const tasks = await getTasks();
     const result = await doTasks(tasks);
