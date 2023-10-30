@@ -179,12 +179,20 @@ async function xybSign(config) {
         blogDates.push({ year: id, month: month.id });
       }
     }
-    console.log("需要写周报的月份有 => ", blogDates);
+    console.log(
+      "*需要写周报的月份有*\n",
+      blogDates.map((val) => `${val.year}.${val.month}`).join("\n")
+    );
     const blogTasks = [];
     for (let { year, month } of blogDates) {
       blogTasks.push(...(await getBlogTasks(year, month, traineeId)));
     }
-    console.log("需要写的周报有 => ", blogTasks);
+    console.log(
+      "*需要写的周报有*\n",
+      blogTasks
+        .map((val) => `第${val.week}周(${val.startDate}-${val.endDate})`)
+        .join("\n")
+    );
     const results = [];
     for (let blogTask of blogTasks) {
       const res = await submitBlog(traineeId, blogTask);
@@ -242,14 +250,14 @@ async function xybSign(config) {
       traineeId
     );
     postInfo.traineeId = traineeId;
-    console.log("mode=>", config.mode);
+    console.log("*签到模式*\n", config.modeCN);
     if (config.mode === "in") {
       //执行签到模式
       if (isSignin) {
         if (config.reSign) {
           if (!isSignout) {
             console.log("已签到,重新签到");
-            const form = getClockForm(postInfo, SIGN_STATUS.IN);
+            const form = await getClockForm(postInfo, SIGN_STATUS.IN);
             return await updateClock(form);
           } else {
             return {
@@ -266,19 +274,19 @@ async function xybSign(config) {
       } else {
         // 首次签到
         const form = await getClockForm(postInfo, SIGN_STATUS.IN);
-        await newClock(form);
-        const { isSignin: success } = await getClockInfo(traineeId);
-        return {
-          res: success,
-          data: success ? "签到成功" : "签到失败",
-        };
+        return await newClock(form);
+        // const { isSignin: success } = await getClockInfo(traineeId);
+        // return {
+        //   res: success,
+        //   data: success ? "签到成功" : "签到失败",
+        // };
       }
     } else {
       //执行签退模式
       if (isSignout) {
         if (config.reSign) {
           console.log("已签退,重新签退");
-          const form = getClockForm(postInfo, SIGN_STATUS.OUT);
+          const form = await getClockForm(postInfo, SIGN_STATUS.OUT);
           return await updateClock(form);
         } else {
           return {
@@ -289,12 +297,12 @@ async function xybSign(config) {
       } else {
         //首次签退
         const form = await getClockForm(postInfo, SIGN_STATUS.OUT);
-        await newClock(form);
-        const { isSignout: success } = await getClockInfo(traineeId);
-        return {
-          res: success,
-          data: success ? "签退成功" : "签退失败",
-        };
+        return await newClock(form);
+        // const { isSignout: success } = await getClockInfo(traineeId);
+        // return {
+        //   res: success,
+        //   data: success ? "签退成功" : "签退失败",
+        // };
       }
     }
   };
@@ -329,13 +337,11 @@ async function xybSign(config) {
   };
   const newClock = async (form) => {
     // await duration();
-    const { startTraineeDayNum, signPersonNum } = await $http.post(
-      apis.clock,
-      form
-    );
+    const { successCount } = await $http.post(apis.clock, form);
+    const success = successCount > 0;
     return {
-      res: true,
-      data: `${config.modeCN}: 当前为第${startTraineeDayNum}天, 排名为${signPersonNum}`,
+      res: success,
+      data: `${config.modeCN}${success ? "成功" : "失败"}`,
     };
   };
   const getClockForm = async (postInfo, signStatus) => {
@@ -346,7 +352,7 @@ async function xybSign(config) {
     ); //生成随机经纬度
     let result = {
       traineeId: postInfo.traineeId,
-      adcode: "550000",
+      adcode: "",
       lat,
       lng,
       address: postInfo.address || "",
@@ -470,19 +476,55 @@ async function xybSign(config) {
     return randomDeviceName;
   };
   //生成一个随机经纬度
-  const getRandomCoordinates = (latitude, longitude, radiusInMeters) => {
-    const earthRadius = 6378137;
-    const lat = (Math.PI / 180) * latitude;
-    const lon = (Math.PI / 180) * longitude;
-    const randomAngle = Math.random() * 2 * Math.PI;
-    const randomDistance = Math.random() * radiusInMeters;
-    const newLat = lat + (randomDistance / earthRadius) * (180 / Math.PI);
-    const newLon =
-      lon + ((randomDistance / earthRadius) * (180 / Math.PI)) / Math.cos(lat);
-    const newLatitude = (newLat * 180) / Math.PI;
-    const newLongitude = (newLon * 180) / Math.PI;
-    return { lat: newLatitude.toFixed(6), lng: newLongitude.toFixed(6) };
-  };
+  function getRandomCoordinates(latitude, longitude, distanceInMeters = 10) {
+    // 地球半径（单位：米）
+    const earthRadius = 6378137; // 地球平均半径
+
+    // 随机方向（0到360度）
+    const randomDirection = Math.random() * 360;
+
+    // 随机距离（0到distanceInMeters）
+    const randomDistance = Math.random() * distanceInMeters;
+
+    // 将距离转换为弧度
+    const distanceInRadians = randomDistance / earthRadius;
+
+    // 将方向转换为弧度
+    const directionInRadians = randomDirection * (Math.PI / 180);
+
+    // 原始坐标的经度和纬度（弧度）
+    const originalLatitudeRadians = latitude * (Math.PI / 180);
+    const originalLongitudeRadians = longitude * (Math.PI / 180);
+
+    // 使用Haversine公式计算新坐标的经度和纬度
+    const newLatitudeRadians = Math.asin(
+      Math.sin(originalLatitudeRadians) * Math.cos(distanceInRadians) +
+        Math.cos(originalLatitudeRadians) *
+          Math.sin(distanceInRadians) *
+          Math.cos(directionInRadians)
+    );
+
+    const newLongitudeRadians =
+      originalLongitudeRadians +
+      Math.atan2(
+        Math.sin(directionInRadians) *
+          Math.sin(distanceInRadians) *
+          Math.cos(originalLatitudeRadians),
+        Math.cos(distanceInRadians) -
+          Math.sin(originalLatitudeRadians) * Math.sin(newLatitudeRadians)
+      );
+
+    // 将新的经纬度坐标转换为度数，并保留与传入参数相同的小数位数
+    const newLatitude = parseFloat(
+      (newLatitudeRadians * (180 / Math.PI)).toFixed(6)
+    );
+    const newLongitude = parseFloat(
+      (newLongitudeRadians * (180 / Math.PI)).toFixed(6)
+    );
+
+    return { lat: newLatitude, lng: newLongitude };
+  }
+
   const xyb = async () => {
     try {
       await login();

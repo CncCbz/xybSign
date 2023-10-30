@@ -1,7 +1,7 @@
 const md5 = require("blueimp-md5");
 
 const config = {
-  mode: "out", // 签到:in,签退:out
+  mode: "in", // 签到:in,签退:out
   accounts: [
     {
       username: "", //用户名
@@ -53,8 +53,8 @@ const apis = {
   clockDetail: "student/clock/GetPlan!detail.action", //traineeId => postInfo
   clock: "student/clock/Post!autoClock.action", //首次签到
   clockNew: "student/clock/PostNew.action", //重新签到或签退
-  clockUpdate: "student/clock/PostNew!updateClock.action", //更新最近的签到/签退记录，已有签退记录时无法更新之前的签到记录
-  // clockUpdate: "student/clock/Post!updateClock.action", // reClock
+  // clockUpdate: "student/clock/PostNew!updateClock.action", //更新最近的签到/签退记录，已有签退记录时无法更新之前的签到记录
+  clockUpdate: "student/clock/Post!updateClock.action", // reClock
   // clockNew: "student/clock/Post!autoClock.action", //临时接口
   // clockUpdate: "student/clock/postTemporary!updateClock.action", // reClock 临时接口
   //上传
