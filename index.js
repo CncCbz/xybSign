@@ -58,6 +58,25 @@ async function xybSign(config) {
           throw new Error(err);
         });
     },
+    location: function (data) {
+      return axios
+        .get(apis.map, {
+          params: data,
+          headers: {
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1",
+            "Content-Type":"application/json",
+          },
+        })
+        .then((res) => {
+          if (res.data.info != "OK") {
+            throw new Error(res.data.info);
+          }
+          return res.data.regeocode;
+        })
+        .catch((err) => {
+          throw new Error(err);
+        });
+    }
   };
   let cookie = "JSESSIONID=6C7149CD82913F66EA0E66B52CDC9DD1";
   let accountInfo = {
@@ -274,12 +293,8 @@ async function xybSign(config) {
       } else {
         // 首次签到
         const form = await getClockForm(postInfo, SIGN_STATUS.IN);
-        return await newClock(form);
-        // const { isSignin: success } = await getClockInfo(traineeId);
-        // return {
-        //   res: success,
-        //   data: success ? "签到成功" : "签到失败",
-        // };
+        // return await newClock(form);
+        return await newClockOut(form);
       }
     } else {
       //执行签退模式
@@ -297,7 +312,7 @@ async function xybSign(config) {
       } else {
         //首次签退
         const form = await getClockForm(postInfo, SIGN_STATUS.OUT);
-        return await newClock(form);
+        return await newClockOut(form);
         // const { isSignout: success } = await getClockInfo(traineeId);
         // return {
         //   res: success,
@@ -344,15 +359,35 @@ async function xybSign(config) {
       data: `${config.modeCN}${success ? "成功" : "失败"}`,
     };
   };
+  const newClockOut = async (form) => {
+    // await duration();
+    const { startTraineeDayNum, signPersonNum } = await $http.post(apis.clockNew, form);
+    return {
+      res: true,
+      data: `${config.modeCN}成功,当前为${config.modeCN}的第${startTraineeDayNum}天，共${config.modeCN}${signPersonNum}人`,
+    };
+  };
+
   const getClockForm = async (postInfo, signStatus) => {
     const { lat, lng } = getRandomCoordinates(
       postInfo.lat,
       postInfo.lng,
       postInfo.distance
     ); //生成随机经纬度
+    
+    const adcode = await getAdcode({
+      key: "c222383ff12d31b556c3ad6145bb95f4",
+      location:`${lng},${lat}`,
+      extensions:'all',
+      s:"rsx",
+      platform:"WXJS",
+      appname:"c222383ff12d31b556c3ad6145bb95f4",
+      sdkversion:"1.2.0",
+      logversion:"2.0"
+    })
     let result = {
       traineeId: postInfo.traineeId,
-      adcode: "",
+      adcode: adcode,
       lat,
       lng,
       address: postInfo.address || "",
@@ -360,6 +395,8 @@ async function xybSign(config) {
       punchInStatus: 1,
       clockStatus: signStatus,
       addressId: postInfo.addressId,
+      imgUrl:"",
+      reason: "",
     };
     let imgUrl = "";
     if (config.signImagePath) {
@@ -379,6 +416,17 @@ async function xybSign(config) {
     const { loginer } = await $http.post(apis.accountInfo);
     accountInfo.loginer = loginer;
   };
+  //获取邮政编码
+  const getAdcode = async (data) => {
+    try {
+      const { addressComponent } = await $http.location(data);
+      const { adcode } = addressComponent || {};
+      return adcode || "";
+    } catch (error) {
+      return ""
+    }
+  }
+
   const clockUpload = async (path) => {
     const {
       accessid: OSSAccessKeyId,
@@ -516,10 +564,10 @@ async function xybSign(config) {
 
     // 将新的经纬度坐标转换为度数，并保留与传入参数相同的小数位数
     const newLatitude = parseFloat(
-      (newLatitudeRadians * (180 / Math.PI)).toFixed(6)
+      (newLatitudeRadians * (180 / Math.PI))
     );
     const newLongitude = parseFloat(
-      (newLongitudeRadians * (180 / Math.PI)).toFixed(6)
+      (newLongitudeRadians * (180 / Math.PI))
     );
 
     return { lat: newLatitude, lng: newLongitude };

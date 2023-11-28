@@ -62,6 +62,8 @@ const apis = {
   uploadFile: "https://xyb001.oss-cn-hangzhou.aliyuncs.com/",
   duration: "behavior/Duration.action",
   ip: "behavior/Duration!getIp.action",
+  // 地图api
+  map:"https://restapi.amap.com/v3/geocode/regeo",
 };
 
 const reports = [
