@@ -377,7 +377,7 @@ async function xybSign(config) {
     
     const adcode = await getAdcode({
       key: "c222383ff12d31b556c3ad6145bb95f4",
-      location:`${lng},${lat}`,
+      location: config.location || `${lng},${lat}`,
       extensions:'all',
       s:"rsx",
       platform:"WXJS",

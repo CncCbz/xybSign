@@ -10,6 +10,7 @@ const config = {
       unionId: "", //微信小程序抓包unionId(可选)
       sign: true, //是否自动签到
       reSign: false, //是否重新签到
+      location: "", //经纬度 (可选),例如 "120.210792,30.246026"、"经度,纬度",不填写则自动获取（推荐）
       // signImagePath: "./images/1.jpeg", //签到图片
       // needReport: false, //是否自动填写周报
     },
