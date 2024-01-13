@@ -14,10 +14,9 @@ const sendMsg = async (msg) => {
     })
     .then((res) => {
       console.log("qmsg消息发送成功");
-      console.log(res.data);
     })
     .catch((err) => {
-      console.log(err);
+      console.log("qmsg消息发送失败");
     });
 };
 
