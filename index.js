@@ -620,7 +620,15 @@ const parseEnvArgv = (argv) => {
     const acs = acStr.split("&");
     for (const c of acs) {
       const cache = c.split("=");
-      info[cache[0]] = cache[1];
+      if (
+        cache[0] == "sign" ||
+        cache[0] == "reSign" ||
+        cache[0] == "needReport"
+      ) {
+        info[cache[0]] = cache[1] == "true" ? true : false;
+      } else {
+        info[cache[0]] = cache[1];
+      }
     }
     res.accounts.push(info);
   }
@@ -648,7 +656,6 @@ async function run() {
       signImagePath: "",
       needReport: false,
     };
-
     config.accounts = config.accounts.map((e) => ({ ...confTemp, ...e }));
     const modeMap = {
       in: "签到",
