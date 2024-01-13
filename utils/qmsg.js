@@ -6,7 +6,6 @@ const sendMsg = async (msg, config) => {
   if (config.qmsgTo) {
     data.qq = config.qmsgTo;
   }
-  console.log(data, config);
   axios
     .post("https://qmsg.zendee.cn/send/" + config.qmsgKey, data, {
       headers: {
