@@ -1,5 +1,5 @@
 const { getHeaders } = require("./utils/xyb.js");
-const { config, apis, reports } = require("./config.js");
+let { config, apis, reports } = require("./config.js");
 const { sendMsg } = require("./utils/qmsg.js");
 const axios = require("axios");
 const fs = require("fs");
@@ -642,8 +642,8 @@ const parseEnvArgv = (argv) => {
 async function run() {
   let results = [];
 
-  let config = parseEnvArgv(process.argv);
-  if (config) {
+  let processConfig = parseEnvArgv(process.argv);
+  if (processConfig) {
     console.log("====使用命令行配置====");
     const confTemp = {
       username: "",
@@ -656,13 +656,16 @@ async function run() {
       signImagePath: "",
       needReport: false,
     };
-    config.accounts = config.accounts.map((e) => ({ ...confTemp, ...e }));
+    processConfig.accounts = processConfig.accounts.map((e) => ({
+      ...confTemp,
+      ...e,
+    }));
     const modeMap = {
       in: "签到",
       out: "签退",
     };
-    config.modeCN = modeMap[config.mode];
-    console.log(config);
+    processConfig.modeCN = modeMap[processConfig.mode];
+    config = processConfig;
   } else {
     console.log("====使用config.js中配置====");
   }
@@ -676,7 +679,7 @@ async function run() {
   console.log("====所有账号执行结束====");
   console.log(results.join("\n"));
   if (config.qmsgKey) {
-    await sendMsg(results.join("\n"));
+    await sendMsg(results.join("\n"), config);
   }
 }
 
