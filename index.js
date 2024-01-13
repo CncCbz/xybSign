@@ -63,8 +63,9 @@ async function xybSign(config) {
         .get(apis.map, {
           params: data,
           headers: {
-            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1",
-            "Content-Type":"application/json",
+            "user-agent":
+              "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1",
+            "Content-Type": "application/json",
           },
         })
         .then((res) => {
@@ -76,7 +77,7 @@ async function xybSign(config) {
         .catch((err) => {
           throw new Error(err);
         });
-    }
+    },
   };
   let cookie = "JSESSIONID=6C7149CD82913F66EA0E66B52CDC9DD1";
   let accountInfo = {
@@ -361,7 +362,10 @@ async function xybSign(config) {
   };
   const newClockOut = async (form) => {
     // await duration();
-    const { startTraineeDayNum, signPersonNum } = await $http.post(apis.clockNew, form);
+    const { startTraineeDayNum, signPersonNum } = await $http.post(
+      apis.clockNew,
+      form
+    );
     return {
       res: true,
       data: `${config.modeCN}成功,当前为${config.modeCN}的第${startTraineeDayNum}天，共${config.modeCN}${signPersonNum}人`,
@@ -374,17 +378,17 @@ async function xybSign(config) {
       postInfo.lng,
       postInfo.distance
     ); //生成随机经纬度
-    
+
     const adcode = await getAdcode({
       key: "c222383ff12d31b556c3ad6145bb95f4",
       location: config.location || `${lng},${lat}`,
-      extensions:'all',
-      s:"rsx",
-      platform:"WXJS",
-      appname:"c222383ff12d31b556c3ad6145bb95f4",
-      sdkversion:"1.2.0",
-      logversion:"2.0"
-    })
+      extensions: "all",
+      s: "rsx",
+      platform: "WXJS",
+      appname: "c222383ff12d31b556c3ad6145bb95f4",
+      sdkversion: "1.2.0",
+      logversion: "2.0",
+    });
     let result = {
       traineeId: postInfo.traineeId,
       adcode: adcode,
@@ -395,7 +399,7 @@ async function xybSign(config) {
       punchInStatus: 1,
       clockStatus: signStatus,
       addressId: postInfo.addressId,
-      imgUrl:"",
+      imgUrl: "",
       reason: "",
     };
     let imgUrl = "";
@@ -423,9 +427,9 @@ async function xybSign(config) {
       const { adcode } = addressComponent || {};
       return adcode || "";
     } catch (error) {
-      return ""
+      return "";
     }
-  }
+  };
 
   const clockUpload = async (path) => {
     const {
@@ -563,12 +567,8 @@ async function xybSign(config) {
       );
 
     // 将新的经纬度坐标转换为度数，并保留与传入参数相同的小数位数
-    const newLatitude = parseFloat(
-      (newLatitudeRadians * (180 / Math.PI))
-    );
-    const newLongitude = parseFloat(
-      (newLongitudeRadians * (180 / Math.PI))
-    );
+    const newLatitude = parseFloat(newLatitudeRadians * (180 / Math.PI));
+    const newLongitude = parseFloat(newLongitudeRadians * (180 / Math.PI));
 
     return { lat: newLatitude, lng: newLongitude };
   }
@@ -593,8 +593,73 @@ ${result}`;
   return results;
 }
 
+const parseEnvArgv = (argv) => {
+  const arguments = argv;
+  let res = {
+    accounts: [],
+  };
+
+  if (!argv[2]) {
+    return false;
+  }
+  const configStrArr = argv[2].split(";");
+  const accountStrs = [];
+  const configStrs = [];
+  for (const confStr of configStrArr) {
+    if (!confStr) {
+      continue;
+    }
+    if (confStr.includes("username")) {
+      accountStrs.push(confStr);
+    } else {
+      configStrs.push(confStr);
+    }
+  }
+  for (const acStr of accountStrs) {
+    const info = {};
+    const acs = acStr.split("&");
+    for (const c of acs) {
+      const cache = c.split("=");
+      info[cache[0]] = cache[1];
+    }
+    res.accounts.push(info);
+  }
+  for (const cfs of configStrs) {
+    const cache = cfs.split("=");
+    res[cache[0]] = cache[1];
+  }
+  return res;
+};
+
 async function run() {
   let results = [];
+
+  let config = parseEnvArgv(process.argv);
+  if (config) {
+    console.log("====使用命令行配置====");
+    const confTemp = {
+      username: "",
+      password: "",
+      openId: "",
+      unionId: "",
+      sign: true,
+      reSign: false,
+      location: "",
+      signImagePath: "",
+      needReport: false,
+    };
+
+    config.accounts = config.accounts.map((e) => ({ ...confTemp, ...e }));
+    const modeMap = {
+      in: "签到",
+      out: "签退",
+    };
+    config.modeCN = modeMap[config.mode];
+    console.log(config);
+  } else {
+    console.log("====使用config.js中配置====");
+  }
+
   for (const account of config.accounts) {
     account.mode = config.mode;
     account.modeCN = config.modeCN;
