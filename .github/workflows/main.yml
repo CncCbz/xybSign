@@ -1,9 +1,6 @@
 name: 签到 # yml文件名
  
 on:
-  push:
-   branches:
-     - node
   workflow_dispatch:
   schedule:   
     - cron: '0 9 * * *'
