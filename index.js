@@ -157,7 +157,7 @@ async function xybSign(config) {
             results.push(`${config.modeCN}失败${err}`);
           }
         } else {
-          results.push("未开启自动${config.modeCN}");
+          results.push(`未开启自动${config.modeCN}`);
         }
       }
       if (task.needWeekBlogs) {
