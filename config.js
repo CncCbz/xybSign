@@ -1,5 +1,3 @@
-const md5 = require("blueimp-md5");
-
 const config = {
   mode: "in", // 签到:in,签退:out
   accounts: [
@@ -29,9 +27,7 @@ const config = {
   qmsgKey: "", //qmsg酱key
   qmsgTo: "", //推送的qq号,用,分隔(可选)
 };
-for (const account of config.accounts) {
-  account.password = md5(account.password);
-}
+
 const modeCN = {
   in: "签到",
   out: "签退",
