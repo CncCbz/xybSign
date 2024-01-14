@@ -4,6 +4,7 @@ const { sendMsg } = require("./utils/qmsg.js");
 const axios = require("axios");
 const fs = require("fs");
 const FormData = require("form-data");
+const md5 = require("blueimp-md5");
 
 async function xybSign(config) {
   let results = "";
@@ -580,7 +581,9 @@ async function xybSign(config) {
       // await duration();
       await getIP();
     } catch (err) {
-      results += `### 账号(${config.username}) ###\n${err}\n`;
+      results += `### 账号(${config.username.substr(
+        config.username.length - 4
+      )}) ###\n${err}\n`;
       return;
     }
     const tasks = await getTasks();
@@ -671,8 +674,10 @@ async function run() {
   }
 
   for (const account of config.accounts) {
+    // console.log(account);
     account.mode = config.mode;
     account.modeCN = config.modeCN;
+    account.password = md5(account.password);
     results.push(await xybSign(account));
     console.log(`====当前账号(${account.username})执行结束====`);
   }
