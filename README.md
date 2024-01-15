@@ -41,7 +41,6 @@
 	 3、账号配置项支持多个，以`&`分割
 	 举例如下：
 	 - 单个账号 `username=用户名&password=密码`
-         -  
 	 - 多个账号`username=用户名&password=密码;username=用户名&password=密码`
 	 - 签到`mode=in` 签退`mode=out`
 	 - qmsg秘钥  `qmsgKey=秘钥`   推送qq号 `qmsgTo=qq1,qq2`
