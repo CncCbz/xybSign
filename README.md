@@ -3,6 +3,9 @@
 # xybSign
 校友邦 多用户 自动签到(上传图片)、填写周报
 
+### 字太多了，不想看？
+just open it -> [异地打卡](https://xybfreesign.netlify.app/)
+
 ### 方法一、利用github action自动签到
 发现下载代码运行的方式对于大部分人来说还是有难度，下面介绍一下如何借助github平台部署`自动化签到`
 - 写在前面
