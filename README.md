@@ -6,7 +6,17 @@
 ### 字太多了，不想看？
 just open it -> [异地打卡](https://xybfreesign.netlify.app/)
 
-### 方法一、利用github action自动签到
+### 方法一、本地运行
+- 下载代码(解压)
+- 修改`config.js`中的配置,正确填写用户名、密码
+  默认配置了一些周报模板,要修改的话,修改config.js中的reports
+  reports的index对应的就是当周周报的多个模板,在提交周报时会随机选取其中一个
+- 在终端中进入代码目录,执行`npm install`
+- 终端中输入`node index.js`运行index.js
+
+### 方法二、利用github action自动签到（不推荐！！）
+`github服务器的IP存在被检测的风险，风险自担！！`
+
 发现下载代码运行的方式对于大部分人来说还是有难度，下面介绍一下如何借助github平台部署`自动化签到`
 - 写在前面
 	 如果你想使用自动签到，强烈建议你注册一个[qmsg酱](https://qmsg.zendee.cn/login)账号用于发送签到通知，避免出现程序故障导致的漏签等情况！[如何使用？](https://qmsg.zendee.cn/docs/start/#%E7%A7%81%E8%81%8A%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E4%BD%BF%E7%94%A8%E6%AD%A5%E9%AA%A4%E7%AE%80%E8%BF%B0)
@@ -50,12 +60,4 @@ just open it -> [异地打卡](https://xybfreesign.netlify.app/)
 
 	查看运行结果，如果成功签到，恭喜你，你已经实现了定时签到功能！
 	 ![image](https://github.com/CncCbz/xybSign/assets/43227065/141c63c4-57d3-4ce9-9b71-eeefd88e4a12)
-
-### 方法二、本地运行
-- 下载代码(解压)
-- 修改`config.js`中的配置,正确填写用户名、密码
-  默认配置了一些周报模板,要修改的话,修改config.js中的reports
-  reports的index对应的就是当周周报的多个模板,在提交周报时会随机选取其中一个
-- 在终端中进入代码目录,执行`npm install`
-- 终端中输入`node index.js`运行index.js
 
