@@ -263,10 +263,12 @@ async function xybSign(config) {
 
   // 签到/签退
   const doClock = async (taskInfo) => {
-    const { clockVo } = await $http.post(apis.clockDefault, {
+    const resp = await $http.post(apis.clockDefault, {
       planId: taskInfo.planId,
     });
-    const traineeId = clockVo?.traineeId;
+    const { clockVo, unStartClockVo } = resp
+    const traineeId = clockVo?.traineeId || unStartClockVo?.traineeId;
+    console.log(">> 获取traineeId成功：", traineeId);
     const { res, postInfo, isSignin, isSignout } = await getClockInfo(
       traineeId
     );
@@ -330,6 +332,7 @@ async function xybSign(config) {
         traineeId,
       }
     );
+    console.log(">> 获取签到表单成功：");
     if (!canSign) {
       console.log("当前无法签到!!");
       return {
