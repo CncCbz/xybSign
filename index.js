@@ -266,7 +266,7 @@ async function xybSign(config) {
     const resp = await $http.post(apis.clockDefault, {
       planId: taskInfo.planId,
     });
-    const { clockVo, unStartClockVo } = resp
+    const { clockVo, unStartClockVo } = resp;
     const traineeId = clockVo?.traineeId || unStartClockVo?.traineeId;
     console.log(">> 获取traineeId成功：", traineeId);
     const { res, postInfo, isSignin, isSignout } = await getClockInfo(
@@ -377,13 +377,20 @@ async function xybSign(config) {
   };
 
   const getClockForm = async (postInfo, signStatus) => {
-    const { lat, lng } = getRandomCoordinates(
-      postInfo.lat,
-      postInfo.lng,
-      postInfo.distance
-    ); //生成随机经纬度
+    const isCustom = !!config.location;
+    let lat = "",
+      lng = "";
+    if (isCustom) {
+      [lng, lat] = config.location.split(",");
+    } else {
+      ({ lat, lng } = getRandomCoordinates(
+        postInfo.lat,
+        postInfo.lng,
+        postInfo.distance
+      )); //生成随机经纬度
+    }
 
-    const adcode = await getAdcode({
+    const { adcode, formatted_address } = await getAdcode({
       key: "c222383ff12d31b556c3ad6145bb95f4",
       location: config.location || `${lng},${lat}`,
       extensions: "all",
@@ -393,12 +400,17 @@ async function xybSign(config) {
       sdkversion: "1.2.0",
       logversion: "2.0",
     });
+
+    if (!formatted_address) {
+      throw new Error("获取自定义位置失败, 请检查");
+    }
+
     let result = {
       traineeId: postInfo.traineeId,
       adcode: adcode,
       lat,
       lng,
-      address: postInfo.address || "",
+      address: isCustom ? formatted_address : postInfo.address || "",
       deviceName: getDeviceName() || "Macmini9,1",
       punchInStatus: 1,
       clockStatus: signStatus,
@@ -427,11 +439,18 @@ async function xybSign(config) {
   //获取邮政编码
   const getAdcode = async (data) => {
     try {
-      const { addressComponent } = await $http.location(data);
+      const res = await $http.location(data);
+      const { addressComponent, formatted_address } = res || {};
       const { adcode } = addressComponent || {};
-      return adcode || "";
+      return {
+        adcode,
+        formatted_address,
+      };
     } catch (error) {
-      return "";
+      return {
+        adcode: "",
+        formatted_address: "",
+      };
     }
   };
 
