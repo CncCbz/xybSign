@@ -4,7 +4,7 @@
 校友邦 多用户 自动签到(上传图片)、填写周报
 
 ### 字太多了，不想看？
-just open it -> [异地打卡](https://xyb.fanatics013.asia/)
+just open it -> [异地打卡](https://xybfree.fanatics013.asia/)
 
 ### 方法一、本地运行
 - 下载代码(解压)
