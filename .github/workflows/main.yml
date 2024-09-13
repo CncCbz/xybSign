@@ -1,33 +1,33 @@
-name: 签到 # yml文件名
+名字: 名称:签到# yml文件名# yml文件名
  
-on:
-  workflow_dispatch:
-  schedule:   
-    # https://crontab.guru/
-    # UTC 时间，中国时区应减 8
-    #         ┌────────── minute (0 - 59)
-    #         │ ┌──────── hour (0 - 23)
-    #         │ │ ┌────── day of the month (1 - 31)
-    #         │ │ │ ┌──── month (1 - 12 or JAN-DEC)
-    #         │ │ │ │ ┌── day of the week (0 - 6 or SUN-SAT)
+在:
+工作流_调度:
+日程安排:   
+# https://crontab.guru/#·https://crontab.guru/
+#世界协调时时间,中国时区应减8#世界协调时时间,中国时区应减8
+# ┌──────────一分钟(0 - 59)# ┌──────────分钟(0 - 59)
+# │ ┌────────时间(0 - 23)# │ ┌────────小时(0 - 23)
+# │ │每月的┌──────日(1 - 31)# │ │每月的┌──────日(1 - 31)
+# │ │ │ ┌────月(1 - 12月或1-12月)# │ │ │ ┌────月(1 - 12月或1-12月)
+#│││┌──一周中的某一天(0 - 6或周六)# │ │ │ │ ┌──一周中的某一天(0 - 6或周六)
     #         │ │ │ │ │
-    - cron: '0 1 * * *'
+    - 时间单位: '0 15 3 ? * *'
  
-jobs:
-  run-check-in: # 任务名
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+工作:
+运行-检入: # 任务名
+连续运行: 运行:Ubuntu-最新版
+步伐:
+      - 名字: -名称:签出存储库
+使用: 用法:actions/checkout@v3
         
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '20.x'
+      - 使用: -用途:actions/setup-node@v3
+随着:
+节点版本: 20.x '
           
-      - name: 安装依赖  
-        run: |
-          npm install
+      - 名字: -姓名:安装依赖
+奔跑: |
+npm安装
 
-      - name: 运行签到
-        run: |
-          node ./index.js '${{ secrets.XYB }}'
+-姓名:运行签到
+运行:
+节点。/index.js '${{ secrets。XYB }} '
