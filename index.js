@@ -6,6 +6,7 @@ const axios = require("axios");
 const fs = require("fs");
 const FormData = require("form-data");
 const md5 = require("blueimp-md5");
+const { calendar } = require("./utils/calendar.js");
 
 async function xybSign(config) {
   let results = "";
@@ -437,6 +438,7 @@ async function xybSign(config) {
     const { loginer } = await $http.post(apis.accountInfo);
     accountInfo.loginer = loginer;
   };
+
   //获取邮政编码
   const getAdcode = async (data) => {
     try {
@@ -551,6 +553,7 @@ async function xybSign(config) {
     const randomDeviceName = deviceNames[randomIndex];
     return randomDeviceName;
   };
+
   //生成一个随机经纬度
   function getRandomCoordinates(latitude, longitude, distanceInMeters = 10) {
     // 地球半径（单位：米）
@@ -616,6 +619,10 @@ ${result}`;
     // await sendMsg(result);
   };
   await xyb();
+  if (config.withCalendar) {
+    const [matrix, clockMonthCount, clockTotalCount] = await calendar(config.username, config.password)
+    results += `\n${matrix}`
+  }
   return results;
 }
 
@@ -710,7 +717,7 @@ async function run() {
     await sendMsg(results.join("\n"), config);
   }
   if (config.wxPusherAppToken) {
-    await sendWxMsg(results.join("\n"), config);
+    sendWxMsg(results.join("\n"), config);
   }
 }
 
