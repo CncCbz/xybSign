@@ -11,6 +11,7 @@ const config = {
       location: "", //经纬度 (可选),例如 "120.210792,30.246026"、"经度,纬度",不填写则自动获取（推荐）
       // signImagePath: "./images/1.jpeg", //签到图片
       // needReport: false, //是否自动填写周报
+      withCalendar: true // 通知服务是否携带签到日历
     },
     // 添加多个账户
     // {
@@ -22,6 +23,7 @@ const config = {
     //   reSign: true, //是否重新签到
     //   signImagePath: "./images/1.jpeg", //签到图片
     //   needReport: false, //是否自动填写周报
+    //   withCalendar: true // 通知服务是否携带签到日历
     // },
   ],
   qmsgKey: "", //qmsg酱key
